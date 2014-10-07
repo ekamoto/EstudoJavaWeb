@@ -9,44 +9,28 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sound.sampled.TargetDataLine;
 
 import org.apache.jasper.tagplugins.jstl.core.ForEach;
 
 import br.com.alura.gerenciador.Empresa;
 import br.com.alura.gerenciador.dao.EmpresaDAO;
+import br.com.alura.gerenciador.web.Tarefa;
 
 @WebServlet(urlPatterns="/busca")
-public class BuscaEmpresa extends HttpServlet{
+public class BuscaEmpresa implements Tarefa{
 
 	public BuscaEmpresa() {
 		System.out.println("Construindo uma servlet do tipo buscaEmpresa" + this);
 	}
-	
+
 	@Override
-	public void init() throws ServletException {
-		super.init();
+	public String executa(HttpServletRequest req, HttpServletResponse resp) {
+		String filtro = req.getParameter("filtro");
 		
-		System.out.println("Inicializando a servlet" + this);
-	}
-	
-	@Override
-	public void destroy() {
-		super.destroy();
-		System.out.println("Destruindo a servlet" + this);
-	}
-	
-	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
+		Collection<Empresa> empresas = new EmpresaDAO().buscaPorSimilaridade(filtro);
+		req.setAttribute("empresas", empresas);
 		
-			String filtro = req.getParameter("filtro");
-			
-			Collection<Empresa> empresas = new EmpresaDAO().buscaPorSimilaridade(filtro);
-			req.setAttribute("empresas", empresas);
-			
-			RequestDispatcher dispatcher = req.getRequestDispatcher("/WEB-INF/paginas/buscaEmpresa.jsp");
-			
-			dispatcher.forward(req, resp);
-			 
+		return "/WEB-INF/paginas/buscaEmpresa.jsp";
 	}
 }

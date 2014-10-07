@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.Cookie;
@@ -17,26 +18,25 @@ import br.com.alura.gerenciador.Usuario;
 import br.com.alura.gerenciador.dao.UsuarioDAO;
 
 @WebServlet(urlPatterns="/login")
-public class Login extends HttpServlet{
+public class Login implements Tarefa{
 
 	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
+	public String executa(HttpServletRequest req, HttpServletResponse resp) {
 		String email = req.getParameter("email");
 		String senha = req.getParameter("senha");
 		
 		Usuario usuario = new UsuarioDAO().buscaPorEmailESenha(email, senha);
 		
-		
-		PrintWriter writer = resp.getWriter();
 		if(usuario==null) {
-			writer.println("<html><body>Usuário inválido</body></html>");
+			// Usuário inválido
+			req.setAttribute("resposta", "Usuário inválido");
 		} else {
+			req.setAttribute("resposta", "Usuário logado: "+usuario.getEmail());
 			
 			HttpSession session = req.getSession();
 			
 			session.setAttribute("usuarioLogado", usuario);
-			writer.println("<html><body>Usuário logado" + usuario.getEmail() + "</body></html>");
 		}
+		return "/WEB-INF/paginas/login.jsp";
 	}
 }
